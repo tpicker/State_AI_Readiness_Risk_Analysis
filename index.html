@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Assess sixteen decision factors for your assigned U.S. state, explore a live risk heat map, and print or save this assessment as a PDF.">
+  <meta name="description" content="Assess sixteen decision factors for your assigned country, explore a live risk heat map, and print or save this assessment as a PDF.">
   <meta name="theme-color" content="#12385f">
-  <title>AI Facility Risk Analysis — U.S. State</title>
+  <title>Country AI Readiness Risk Analysis</title>
   <style>
 
 :root{--navy:#12385f;--ink:#17324d;--text:#263f54;--muted:#526b80;--border:#d6e0e8;--paper:#f3f6f9;--soft:#edf4fa;--teal:#006d8f;--input:#fff;--focus:#1d83cf;color-scheme:light;font-family:Arial,Helvetica,sans-serif}
@@ -242,6 +242,35 @@ dialog>p{font-size:13px;line-height:1.75;color:var(--muted)}
 
 .assessment-scope{display:flex;align-items:center;gap:10px;min-height:43px;padding:10px 14px;background:var(--navy);color:#fff;border-radius:8px;font-size:13px}.assessment-scope .tab-count{background:#ffffff20;color:#fff}.assessment-scope>span:first-child{font-size:16px}
 </style>
+<style>
+/* Learning content follows the existing app's colors and typography. */
+.learning-panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin:0 0 22px;font-size:14px;line-height:1.65}
+.learning-panel h2{font-size:21px;color:var(--navy);margin:0 0 10px}
+.learning-panel p{margin:0 0 12px}
+.learning-panel .learning-kicker{color:var(--muted);font-size:11px;margin-bottom:7px}
+.learning-terms{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:18px 0}
+.learning-terms>div{border-left:3px solid var(--navy);padding-left:13px}
+.learning-terms dt,.results-terms dt{font-weight:700;color:var(--navy);margin:0 0 4px}
+.learning-terms dd,.results-terms dd{margin:0;color:var(--muted)}
+.learning-note{font-size:13px;color:var(--muted)}
+.learning-detail{border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+.learning-detail summary,.factor-help summary{color:var(--navy);font-weight:700;cursor:pointer;min-height:36px;line-height:1.6}
+.learning-detail[open] summary{margin-bottom:10px}
+.overview-detail{border-top:0;padding-top:0;margin-top:0}
+.overview-detail>summary{font-size:21px;min-height:44px;line-height:1.45}
+.overview-detail>summary h2{display:inline;font-size:inherit;margin:0}
+.results-terms{margin:0 0 12px}
+.results-terms dd{margin-bottom:12px}
+.learning-panel a{color:var(--navy);text-underline-offset:3px}
+.factor-help{font-size:12px;line-height:1.6;margin:10px 0 0}
+.factor-help summary{font-size:12px;min-height:28px}
+.factor-help p{margin:7px 0;color:var(--muted)}
+.definition-table td p{margin:0 0 9px}
+.definition-table td p:last-child{margin-bottom:0}
+.definition-example{color:var(--muted)}
+@media(max-width:620px){.learning-panel{padding:20px 18px;font-size:14px}.learning-terms{grid-template-columns:1fr;gap:14px}.learning-panel h2,.overview-detail>summary{font-size:20px}.factor-help,.factor-help summary{font-size:13px}}
+@media print{.print-risk-prompt{display:block;font-size:9px;line-height:1.35;color:#4e6478;margin-top:3px}}
+</style>
   <script type="module">
 /** All assessment data is held by the caller in browser memory. */
 const FACTOR_GROUPS = [
@@ -249,40 +278,40 @@ const FACTOR_GROUPS = [
     id: 'environmental',
     name: 'Environmental',
     factors: [
-      { id: 'carbon-emissions', name: 'Carbon emissions', definition: 'Greenhouse gas emissions throughout the project lifecycle.' },
-      { id: 'water-consumption', name: 'Water consumption', definition: 'Use of water resources during construction and operation.' },
-      { id: 'biodiversity-impacts', name: 'Biodiversity impacts', definition: 'Effects on ecosystems, habitats, and species conservation.' },
-      { id: 'land-use', name: 'Land use', definition: 'Land requirements and impacts on existing land uses.' },
+      { id: 'carbon-emissions', name: 'Carbon emissions', definition: "Climate-warming emissions, especially carbon dioxide, associated with the electricity and other energy used to support AI.", riskPrompt: "Added energy demand increases emissions or makes climate goals harder to meet.", example: "A proposed energy mix relies heavily on fuels that release carbon dioxide. Consider the likely increase in emissions and the consequences for national goals." },
+      { id: 'water-consumption', name: 'Water consumption', definition: "Water used in a way that makes it unavailable for immediate reuse locally, such as water lost through evaporation during cooling.", riskPrompt: "Water needs for AI and its energy supply put pressure on people, farming, ecosystems, or existing services.", example: "During a dry season, extra cooling demand could compete with drinking water or irrigation. Consider the country’s water availability and safeguards." },
+      { id: 'biodiversity-impacts', name: 'Biodiversity impacts', definition: "Effects on the variety of plants and animals and the habitats that support them.", riskPrompt: "The energy choices supporting AI damage habitats, species, or ecosystem health.", example: "An energy option could affect a sensitive river or habitat. Consider the extent of harm and whether it can be avoided or reduced." },
+      { id: 'land-use', name: 'Land use', definition: "How land is shared among uses such as farming, housing, nature, energy supply, and infrastructure.", riskPrompt: "Land needed to support AI readiness conflicts with other uses or creates lasting environmental or community harm.", example: "An energy option could require land also valued for food production or conservation. Consider the scale of the conflict and available alternatives." },
     ],
   },
   {
     id: 'social-policy',
     name: 'Social & Policy',
     factors: [
-      { id: 'public-acceptance', name: 'Public acceptance', definition: 'Community support and stakeholder engagement for project success.' },
-      { id: 'environmental-justice', name: 'Environmental justice', definition: 'Fair distribution of benefits and burdens across communities.' },
-      { id: 'regulatory-certainty', name: 'Regulatory certainty', definition: 'Stability of policies, incentives, and permitting processes that reduce risk.' },
-      { id: 'workforce-development', name: 'Workforce development', definition: 'Job creation and skills building for a sustainable clean energy workforce.' },
+      { id: 'public-acceptance', name: 'Public acceptance', definition: "The willingness of people and communities to accept AI expansion and the energy choices needed to support it.", riskPrompt: "Public concerns or opposition make the AI readiness recommendation difficult to support or sustain.", example: "Stakeholders raise unresolved concerns about energy bills, water, or fairness. Consider how widespread those concerns are and their effect on acceptance." },
+      { id: 'environmental-justice', name: 'Environmental justice', definition: "How fairly environmental benefits and burdens are shared, especially for communities already facing disadvantage or pollution.", riskPrompt: "Some groups bear a disproportionate share of pollution, water stress, higher costs, or other burdens.", example: "Communities already facing pollution could experience additional burdens while receiving few benefits. Consider who is affected and how seriously." },
+      { id: 'regulatory-certainty', name: 'Regulatory certainty', definition: "How clear, predictable, and consistent the rules, policies, and public decisions affecting AI and energy are.", riskPrompt: "Unclear or changing rules create uncertainty that makes AI readiness goals harder to achieve.", example: "Rules for energy connections or environmental protection are unclear or frequently change. Consider the likely consequences for the recommendation." },
+      { id: 'workforce-development', name: 'Workforce development', definition: "The ability to train, recruit, and retain people with the skills needed for AI, electricity systems, and related services.", riskPrompt: "Skills shortages or limited access to training prevent the country from supporting AI readiness and good jobs.", example: "The energy mix requires technical skills that are in short supply. Consider whether education and training can address the gap in time." },
     ],
   },
   {
     id: 'economic',
     name: 'Economic',
     factors: [
-      { id: 'capital-cost', name: 'Capital cost', definition: 'Upfront investment required for construction and equipment.' },
-      { id: 'operating-cost', name: 'Operating cost', definition: 'Ongoing expenses for operation and maintenance.' },
-      { id: 'return-on-investment', name: 'Return on investment', definition: 'Expected financial returns over the project lifetime.' },
-      { id: 'levelized-cost-of-energy', name: 'Levelized Cost of Energy (LCOE)', definition: 'Total cost of energy generation over the system’s lifetime.' },
+      { id: 'capital-cost', name: 'Capital cost', definition: "Upfront spending needed for the energy systems, electricity networks, and digital infrastructure that support AI readiness.", riskPrompt: "Required upfront investment is difficult to fund or diverts resources from other national priorities.", example: "Grid improvements require substantial initial spending. Consider financing availability and the consequences if funding falls short." },
+      { id: 'operating-cost', name: 'Operating cost', definition: "Recurring expenses for electricity, fuel where needed, maintenance, staffing, and day-to-day services.", riskPrompt: "Ongoing costs become unaffordable or make AI and energy services difficult to sustain.", example: "An energy choice depends on costly fuel or maintenance. Consider how recurring expenses could affect affordability over time." },
+      { id: 'return-on-investment', name: 'Return on investment', definition: "Return on investment (ROI) compares the financial gain or loss from an investment with the money invested.", riskPrompt: "Financial returns are too low or uncertain to justify the investment needed for AI readiness.", example: "Expected financial benefits may fall short of the costs. Assess that financial risk while considering social and environmental benefits separately." },
+      { id: 'levelized-cost-of-energy', name: 'Levelized Cost of Energy (LCOE)', definition: "Levelized cost of energy (LCOE) estimates the lifetime cost per unit of electricity generated, often shown as cost per megawatt-hour ($/MWh).", riskPrompt: "The expected cost of producing electricity makes the proposed energy mix difficult to afford.", example: "An option may have a low upfront price but higher lifetime generation costs. Compare cost per unit of electricity alongside grid, environmental, and reliability needs." },
     ],
   },
   {
     id: 'technical',
     name: 'Technical',
     factors: [
-      { id: 'resource-availability', name: 'Resource availability', definition: 'Adequacy and consistency of renewable resource potential.' },
-      { id: 'grid-integration', name: 'Grid integration', definition: 'Compatibility with existing grid infrastructure and capacity.' },
-      { id: 'storage-requirements', name: 'Storage requirements', definition: 'Need for energy storage to ensure reliability and flexibility.' },
-      { id: 'reliability', name: 'Reliability', definition: 'Ability to consistently meet energy demand.' },
+      { id: 'resource-availability', name: 'Resource availability', definition: "Whether sufficient sun, wind, water, fuel, or other resources are available to support the chosen energy mix over time.", riskPrompt: "Resource shortages, seasonal changes, or supply interruptions limit the energy available for AI readiness.", example: "An energy choice depends on seasonal rainfall or imported fuel. Consider how resource variation could affect supply." },
+      { id: 'grid-integration', name: 'Grid integration', definition: "The ability of the electricity network to connect, carry, and balance the supply and demand associated with AI readiness.", riskPrompt: "Grid limits make it difficult to deliver electricity where and when AI and other users need it.", example: "Electricity generation may be available while transmission capacity is limited. Consider whether the network can meet the added demand." },
+      { id: 'storage-requirements', name: 'Storage requirements', definition: "The amount of stored energy and the length of time it must supply power when generation and demand do not match.", riskPrompt: "Available storage is too small, too costly, or unable to cover the length of a supply shortfall.", example: "Storage may cover a short gap but not several days of low generation. Consider both how much energy can be stored and how long it is needed." },
+      { id: 'reliability', name: 'Reliability', definition: "The ability of the energy system to provide dependable electricity when users need it.", riskPrompt: "Outages or supply disruptions prevent AI services and other important activities from operating dependably.", example: "Frequent interruptions could affect digital services, businesses, and communities. Consider the likelihood and consequences of those interruptions." },
     ],
   },
 ].map(group => ({
@@ -360,8 +389,8 @@ function calculateAssessment(assessment) {
 
 const $=id=>document.getElementById(id);
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const palettes={environmental:{color:'#44725c',tint:'#e5eee5',description:'Consider the effects on natural systems and resources.'},'social-policy':{color:'#556e99',tint:'#e7edf5',description:'Consider communities, policy, and the people behind the project.'},economic:{color:'#907344',tint:'#f1ece1',description:'Consider investment, ongoing costs, and financial returns.'},technical:{color:'#78678f',tint:'#eee9f4',description:'Consider resources, infrastructure, and dependable energy.'}};
-const LOCATION_LABEL="U.S. State";
+const palettes={environmental:{color:'#44725c',tint:'#e5eee5',description:'Consider the effects on natural systems and resources.'},'social-policy':{color:'#556e99',tint:'#e7edf5',description:'Consider communities, policy, and the people affected by AI readiness decisions.'},economic:{color:'#907344',tint:'#f1ece1',description:'Consider investment, ongoing costs, and financial returns.'},technical:{color:'#78678f',tint:'#eee9f4',description:'Consider resources, infrastructure, and dependable energy.'}};
+const LOCATION_LABEL="Country";
 let assessment=createAssessment();
 let selectedGroup=FACTOR_GROUPS[0].id;
 let selectedCell=null;
@@ -382,7 +411,7 @@ function renderCategories(){
 
 function scoreControl(factor,field,value){
  const label=field==='likelihood'?'Likelihood':'Impact';
- return `<div class="score-control"><label for="${factor.id}-${field}">${label}</label><select id="${factor.id}-${field}" data-factor="${factor.id}" data-field="${field}" aria-label="${label} for ${escape(factor.name)} (1 to 5)"><option value=""${value===''?' selected':''}>—</option>${[1,2,3,4,5].map(n=>`<option value="${n}"${Number(value)===n?' selected':''}>${n}</option>`).join('')}</select></div>`;
+ return `<div class="score-control"><label for="${factor.id}-${field}">${label}</label><select id="${factor.id}-${field}" data-factor="${factor.id}" data-field="${field}" aria-label="${label} for ${escape(factor.name)} (1 to 5)" aria-describedby="${field}-help"><option value=""${value===''?' selected':''}>—</option>${[1,2,3,4,5].map(n=>`<option value="${n}"${Number(value)===n?' selected':''}>${n}</option>`).join('')}</select></div>`;
 }
 
 function renderCards(){
@@ -391,7 +420,7 @@ function renderCards(){
   const entry=current().entries[factor.id];
   const number=String(FACTORS.findIndex(f=>f.id===factor.id)+1).padStart(2,'0');
   return `<article class="factor-card" data-card="${factor.id}" style="--category-color:${groupPalette(group.id).color}" aria-labelledby="${factor.id}-title">
-   <div class="factor-top"><div><div class="factor-title"><span class="factor-number">${number}</span><h3 id="${factor.id}-title">${escape(factor.name)}</h3></div><p class="factor-definition">${escape(factor.definition)}</p></div><span class="factor-rank" data-rank="${factor.id}">Rank <b>—</b></span></div>
+   <div class="factor-top"><div><div class="factor-title"><span class="factor-number">${number}</span><h3 id="${factor.id}-title">${escape(factor.name)}</h3></div><p class="factor-definition">${escape(factor.definition)}</p><details class="factor-help"><summary>What risk am I rating?</summary><p><strong>Risk to rate:</strong> ${escape(factor.riskPrompt)}</p><p><strong>Hypothetical example:</strong> ${escape(factor.example)}</p></details></div><span class="factor-rank" data-rank="${factor.id}">Rank <b>—</b></span></div>
    <div class="factor-score-row">${scoreControl(factor,'likelihood',entry.likelihood)}<span class="score-times" aria-hidden="true">×</span>${scoreControl(factor,'impact',entry.impact)}<span class="score-equals" aria-hidden="true">=</span><div class="risk-result" data-score="${factor.id}" role="status" aria-live="polite" aria-atomic="true" aria-label="Calculated risk score"><span class="risk-number">—</span><span class="risk-level">Not scored</span></div></div>
   </article>`;
  }).join('');
@@ -455,7 +484,7 @@ function resetAssessment(){
 }
 
 function renderDefinitions(){
- $('definitions-content').innerHTML=FACTOR_GROUPS.map(group=>`<section class="definition-section" style="--group-color:${groupPalette(group.id).color};--group-tint:${groupPalette(group.id).tint}"><h3>${escape(group.name)}</h3><table class="definition-table"><caption class="sr-only">${escape(group.name)} decision factors and definitions</caption><tbody>${group.factors.map(factor=>`<tr><th scope="row">${escape(factor.name)}</th><td>${escape(factor.definition)}</td></tr>`).join('')}</tbody></table></section>`).join('');
+ $('definitions-content').innerHTML=FACTOR_GROUPS.map(group=>`<section class="definition-section" style="--group-color:${groupPalette(group.id).color};--group-tint:${groupPalette(group.id).tint}"><h3>${escape(group.name)}</h3><table class="definition-table"><caption class="sr-only">${escape(group.name)} decision factors and definitions</caption><tbody>${group.factors.map(factor=>`<tr><th scope="row">${escape(factor.name)}</th><td><p>${escape(factor.definition)}</p><p><strong>Risk to rate:</strong> ${escape(factor.riskPrompt)}</p><p class="definition-example"><strong>Hypothetical example:</strong> ${escape(factor.example)}</p></td></tr>`).join('')}</tbody></table></section>`).join('');
 }
 
 function renderPrintReport(){
@@ -465,14 +494,14 @@ function renderPrintReport(){
  for(const group of FACTOR_GROUPS){
   table+=`<tbody class="print-category"><tr class="print-group"><th colspan="6" scope="colgroup">${escape(group.name)}</th></tr>`;
   for(const row of summary.rows.filter(row=>row.groupId===group.id)){
-   table+=`<tr class="print-factor"><th scope="row"><strong>${escape(row.name)}</strong><span class="print-definition">${escape(row.definition)}</span></th><td>${row.likelihood??'—'}</td><td>${row.impact??'—'}</td><td>${row.score??'—'}</td><td>${row.level??'—'}</td><td>${row.rank??'—'}</td></tr>`;
+   table+=`<tr class="print-factor"><th scope="row"><strong>${escape(row.name)}</strong><span class="print-definition">${escape(row.definition)}</span><span class="print-risk-prompt"><strong>Risk to rate:</strong> ${escape(row.riskPrompt)}</span></th><td>${row.likelihood??'—'}</td><td>${row.impact??'—'}</td><td>${row.score??'—'}</td><td>${row.level??'—'}</td><td>${row.rank??'—'}</td></tr>`;
   }
   table+='</tbody>';
  }
  let heatmap='<thead><tr><th scope="col">Likelihood ↓ / Impact →</th>'+[1,2,3,4,5].map(n=>`<th scope="col">${n}</th>`).join('')+'</tr></thead><tbody>';
  for(let row=0;row<5;row++)heatmap+=`<tr><th scope="row">${5-row}</th>`+summary.heatmap[row].map((count,col)=>`<td class="print-severity ${severity((5-row)*(col+1)).toLowerCase()}">${count}</td>`).join('')+'</tr>';
  heatmap+='</tbody>';
- $('print-report').innerHTML=`<header class="print-heading"><p>AI ENERGY LAB · RISK ANALYSIS</p><h1>AI facility risk assessment — ${locationType}</h1><h2>${locationType}: ${escape(current().location.trim()||'Not specified')}</h2></header><div class="print-summary"><span><strong>${summary.count}/16</strong> factors scored</span><span><strong>${summary.criticalCount}</strong> critical risks</span><span>Average score: <strong>${summary.averageScore?.toFixed(1)??'—'}</strong> / 25</span></div><table class="print-factors"><colgroup><col class="print-factor-column"><col><col><col><col><col></colgroup><thead><tr><th scope="col">Decision factor and definition</th><th scope="col">Likelihood</th><th scope="col">Impact</th><th scope="col">Risk score</th><th scope="col">Risk level</th><th scope="col">Priority rank</th></tr></thead>${table}</table><div class="print-insights"><section><h3>Risk frequency heat map</h3><table class="print-heatmap">${heatmap}</table></section><section class="print-guide"><h3>Reading the results</h3><p>Risk score = Likelihood × Impact.</p><p>Low: 1–4 · Moderate: 5–9<br>High: 10–14 · Critical: 15–25</p><p>Heat map numbers count scored factors.<br>Priority 1 is the highest priority; every scored factor has a unique rank.</p><p>Equal scores: higher impact first, then likelihood, then listed factor order.</p><p>— indicates an incomplete result.</p></section></div>`;
+ $('print-report').innerHTML=`<header class="print-heading"><p>AI ENERGY LAB · RISK ANALYSIS</p><h1>AI readiness risk assessment — ${locationType}</h1><h2>${locationType}: ${escape(current().location.trim()||'Not specified')}</h2></header><div class="print-summary"><span><strong>${summary.count}/16</strong> factors scored</span><span><strong>${summary.criticalCount}</strong> critical risks</span><span>Average score: <strong>${summary.averageScore?.toFixed(1)??'—'}</strong> / 25</span></div><table class="print-factors"><colgroup><col class="print-factor-column"><col><col><col><col><col></colgroup><thead><tr><th scope="col">Decision factor and definition</th><th scope="col">Likelihood</th><th scope="col">Impact</th><th scope="col">Risk score</th><th scope="col">Risk level</th><th scope="col">Priority rank</th></tr></thead>${table}</table><div class="print-insights"><section><h3>Risk frequency heat map</h3><table class="print-heatmap">${heatmap}</table></section><section class="print-guide"><h3>Reading the results</h3><p>Likelihood: chance of the harmful outcome (1–5). Impact: seriousness of its consequences (1–5).</p><p>Risk score = Likelihood × Impact. Higher scores mean more concern.</p><p>Low: 1–4 · Moderate: 5–9<br>High: 10–14 · Critical: 15–25</p><p>Heat map numbers count scored factors.<br>Priority 1 is the highest priority; every scored factor has a unique rank.</p><p>Equal scores: higher impact first, then likelihood, then listed factor order.</p><p>Cell numbers count factors with the same ratings; they are not risk scores. Average risk score includes only fully scored factors.</p><p>— indicates an incomplete result. Hypothetical example: 4 × 4 = 16, Critical.</p></section></div>`;
 }
 
 function printAssessment(){
@@ -506,7 +535,7 @@ window.addEventListener('beforeprint',renderPrintReport);
 $('reset-button').addEventListener('click',()=>{
  $('reset-dialog').showModal();
 });
-$('confirm-reset').addEventListener('click',()=>{resetAssessment();$('reset-dialog').close();announce("U.S. State assessment has been reset.");});
+$('confirm-reset').addEventListener('click',()=>{resetAssessment();$('reset-dialog').close();announce("Country assessment has been reset.");});
 document.querySelectorAll('.close-dialog').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}));
 window.addEventListener('pageshow',event=>{if(event.persisted){document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());$('print-report').replaceChildren();resetAssessment();}});
@@ -518,8 +547,8 @@ renderDefinitions();renderCategories();renderCards();
   <a class="skip-link" href="#assessment">Skip to assessment</a>
   <main class="page-shell">
     <header class="intro" aria-labelledby="page-title">
-      <div><p class="eyebrow">AI FACILITY · LOCATION &amp; ENERGY DECISIONS</p><h1 id="page-title">AI Facility Risk Analysis — U.S. State</h1>
-      <p class="intro-copy">Assess 16 decision factors for your assigned U.S. state. Rate likelihood and impact, then use the risk heat map and priority rankings to support your recommendation.</p></div>
+      <div><p class="eyebrow">AI READINESS · ENERGY &amp; ENVIRONMENTAL DECISIONS</p><h1 id="page-title">Country AI Readiness Risk Analysis</h1>
+      <p class="intro-copy">Assess problems that could affect your assigned country’s AI readiness and energy choices. Rate how likely each problem is and how serious its consequences would be, then use the results to support your recommendation.</p></div>
       <div class="hero-count" aria-label="16 decision factors"><strong>16</strong><span>decision factors</span></div>
     </header>
 
@@ -531,13 +560,58 @@ renderDefinitions();renderCategories();renderCards();
       </nav>
     </div>
 
+    <section class="learning-panel" aria-labelledby="risk-basics-title">
+      <p class="eyebrow learning-kicker">START HERE</p>
+      <details class="learning-detail overview-detail" id="risk-overview">
+      <summary><h2 id="risk-basics-title">What are you assessing?</h2></summary>
+      <p>Consider problems that could affect your assigned country’s AI readiness and its energy choices. Use your course evidence and stakeholder perspectives, and keep the same planning period in mind for all 16 factors.</p>
+      <p><strong>Score the risk of a problem.</strong> For a factor such as reliability, consider the risk of unreliable supply. For workforce development, consider the risk of missing skills or training. Higher scores always mean greater concern.</p>
+      <dl class="learning-terms">
+        <div><dt>Likelihood</dt><dd id="likelihood-help">How likely is the problem to happen or continue? Choose 1 for very unlikely through 5 for very likely.</dd></div>
+        <div><dt>Impact</dt><dd id="impact-help">If the problem happens, how serious would its consequences be? Choose 1 for minimal effects through 5 for critical effects.</dd></div>
+        <div><dt>Risk score</dt><dd>Likelihood × Impact, from 1 to 25. Use it to compare concerns within your assessment.</dd></div>
+      </dl>
+      <p class="learning-note">Choose a country, work through the four categories, and rate each factor. Open “What risk am I rating?” on a card for guidance and a hypothetical example. Leave a rating blank while you gather evidence; both ratings are needed for a score.</p>
+      </details>
+      <details class="learning-detail">
+        <summary>See a worked scoring example</summary>
+        <p><strong>Hypothetical grid example:</strong> You judge that grid limits are likely to constrain AI readiness (likelihood 4) and would cause major disruption (impact 4). The score is 4 × 4 = <strong>16, Critical</strong>.</p>
+        <p>If the same problem were unlikely (likelihood 2), while its impact remained 4, the score would be 2 × 4 = <strong>8, Moderate</strong>. Choose your ratings using evidence for your assigned country.</p>
+      </details>
+      <details class="learning-detail">
+        <summary>Understand the heat map, priority ranks, and summary numbers</summary>
+        <dl class="results-terms">
+          <dt>Risk level</dt><dd>The label for a score: Low 1–4, Moderate 5–9, High 10–14, or Critical 15–25. The impact rating describes consequences; the risk level comes from multiplying likelihood and impact.</dd>
+          <dt>Heat map</dt><dd>A grid of likelihood and impact combinations. Color shows the risk level at that combination. The number in a cell counts scored factors there. A 2 means two factors have those same ratings. Select a cell to see their names.</dd>
+          <dt>Priority rank</dt><dd>The order of scored factors from highest concern to lowest. Rank 1 has the highest priority. This app gives each scored factor a separate rank. Equal scores are ordered by higher impact, then higher likelihood, then the order of the factor list.</dd>
+          <dt>Highest priority</dt><dd>The sidebar lists the first five scored factors in that ranking. More factors appear as you complete the assessment.</dd>
+          <dt>Average risk score</dt><dd>The sum of completed risk scores divided by the number of scored factors. Blank or partly rated factors are excluded, so the average can change as you add ratings.</dd>
+          <dt>Critical risks</dt><dd>The number of factors with scores from 15 to 25.</dd>
+          <dt>Factors scored</dt><dd>The number of factors with both a likelihood and an impact rating. A dash means that a result is still incomplete.</dd>
+        </dl>
+      </details>
+      <details class="learning-detail">
+        <summary>Quick glossary: energy and economic terms</summary>
+        <dl class="results-terms">
+          <dt>Energy mix</dt><dd>The combination of energy sources used to support AI and other electricity needs.</dd>
+          <dt>Grid</dt><dd>The connected network of power lines and equipment that moves electricity from supply to users.</dd>
+          <dt>MW and MWh</dt><dd>A megawatt (MW) measures power: the rate of electricity supply or demand. A megawatt-hour (MWh) measures an amount of energy. Supplying 1 MW for one hour provides 1 MWh.</dd>
+          <dt>Capital and operating costs</dt><dd>Capital costs are upfront spending. Operating costs are the recurring expenses needed to keep a service running.</dd>
+          <dt>ROI</dt><dd>Return on investment: financial gain or loss compared with the money invested. It addresses financial return; social and environmental effects are assessed in other factors.</dd>
+          <dt>LCOE and $/MWh</dt><dd>Levelized cost of energy estimates the lifetime cost of generating one unit of electricity. $/MWh means dollars per megawatt-hour. The generation-cost figure should be considered alongside the other factors, including grid needs and reliability.</dd>
+          <dt>Water withdrawal and consumption</dt><dd>Withdrawal is water taken from a source. Consumption is the portion made unavailable for immediate local reuse, such as water lost through evaporation.</dd>
+        </dl>
+        <p class="learning-note">Further explanations: <a href="https://www.eia.gov/energyexplained/electricity/measuring-electricity.php" target="_blank" rel="noopener noreferrer">EIA: electricity units</a>; <a href="https://www.eia.gov/todayinEnergy/detail.php?id=35552" target="_blank" rel="noopener noreferrer">EIA: levelized electricity costs</a>; <a href="https://www.usgs.gov/media/images/consumptive-water-use" target="_blank" rel="noopener noreferrer">USGS: consumptive water use</a>; <a href="https://www.energy.gov/oe/electricity-101" target="_blank" rel="noopener noreferrer">DOE: electricity and the grid</a>. Links open in a new tab.</p>
+      </details>
+    </section>
+
     <section class="workspace-bar" aria-label="Assessment location">
-      <div class="assessment-scope" aria-label="U.S. State assessment"><span aria-hidden="true">◈</span><strong>U.S. State assessment</strong><span class="tab-count" id="scope-count">0/16</span></div>
-      <div class="workspace-actions"><span class="print-scope" id="print-scope">U.S. State · all 16 factors</span><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
+      <div class="assessment-scope" aria-label="Country assessment"><span aria-hidden="true">◎</span><strong>Country assessment</strong><span class="tab-count" id="scope-count">0/16</span></div>
+      <div class="workspace-actions"><span class="print-scope" id="print-scope">Country · all 16 factors</span><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
     </section>
 
     <section class="assessment-overview" aria-label="Assessment overview">
-      <div class="location-field"><label id="location-label" for="location-name">Assigned U.S. state</label><select id="location-name" autocomplete="off"><option value="">Select a state</option><option value="Colorado">Colorado</option><option value="Connecticut">Connecticut</option><option value="Maryland">Maryland</option><option value="New York">New York</option><option value="South Dakota">South Dakota</option><option value="Texas">Texas</option><option value="West Virginia">West Virginia</option></select></div>
+      <div class="location-field"><label id="location-label" for="location-name">Assigned country</label><select id="location-name" autocomplete="off"><option value="">Select a country</option><option value="Algeria">Algeria</option><option value="Brazil">Brazil</option><option value="Costa Rica">Costa Rica</option><option value="France">France</option><option value="Ireland">Ireland</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kenya">Kenya</option><option value="Mexico">Mexico</option><option value="Morocco">Morocco</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="South Korea">South Korea</option><option value="Ukraine">Ukraine</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option></select></div>
       <div class="overview-divider"></div>
       <div class="metric"><span>Factors scored</span><strong><b id="completed-count">0</b><small> / 16</small></strong><div class="progress-track"><div id="progress-fill"></div></div></div>
       <div class="metric"><span>Critical risks</span><strong id="critical-count">0</strong><small>Score of 15–25</small></div>
@@ -556,26 +630,52 @@ renderDefinitions();renderCategories();renderCards();
       <aside class="insights-panel" aria-label="Live risk insights">
         <section class="insight-card heatmap-card" aria-labelledby="heatmap-title">
           <div class="insight-title"><span class="tiny-square" aria-hidden="true"></span><h2 id="heatmap-title">Your risk heat map</h2><span class="live-tag">LIVE</span></div>
-          <p class="panel-copy">See where your scored factors fall.</p>
+          <p class="panel-copy">See which likelihood and impact ratings you used.</p>
           <div class="heatmap-impact">IMPACT <span aria-hidden="true">→</span></div>
           <div class="heatmap-layout"><div class="heatmap-likelihood">LIKELIHOOD <span aria-hidden="true">→</span></div><div id="heatmap" class="heatmap" role="group" aria-label="Risk frequency heat map"></div></div>
           <div class="heatmap-caption"><span>Low</span><div class="severity-scale" aria-hidden="true"><i></i><i></i><i></i><i></i></div><span>Critical</span></div>
-          <p class="heatmap-help">Color shows severity. Each number counts factors. Select a cell to explore.</p>
+          <p class="heatmap-help">Color shows the risk level. A cell’s number counts factors with that pair of ratings. Select a cell to see their names.</p>
           <div id="cell-detail" class="cell-detail" hidden></div>
           <div class="score-key"><span><i class="low-dot"></i> Low <b>1–4</b></span><span><i class="moderate-dot"></i> Moderate <b>5–9</b></span><span><i class="high-dot"></i> High <b>10–14</b></span><span><i class="critical-dot"></i> Critical <b>15–25</b></span></div>
         </section>
         <section class="insight-card priority-card" aria-labelledby="priorities-title"><div class="insight-title"><span class="priority-icon" aria-hidden="true">↗</span><h2 id="priorities-title">Highest priority</h2></div><div id="priority-list"></div></section>
-        <p class="sidebar-note"><span aria-hidden="true">ⓘ</span> Priority ranks are unique. Higher scores rank first. Equal scores use higher impact, then likelihood, then listed factor order.</p>
+        <p class="sidebar-note"><span aria-hidden="true">ⓘ</span> Rank 1 is the highest concern. Each scored factor gets a separate rank. Equal scores use higher impact first, then likelihood, then factor-list order.</p>
       </aside>
     </div>
-    <footer class="page-footer"><span>AI Energy Lab <span aria-hidden="true">/</span> Risk Analysis</span><button class="text-button" id="reset-button">↻ Reset state assessment</button></footer>
+    <footer class="page-footer"><span>AI Energy Lab <span aria-hidden="true">/</span> Risk Analysis</span><button class="text-button" id="reset-button">↻ Reset country assessment</button></footer>
   </main>
 
-  <dialog id="guide-dialog" aria-labelledby="guide-title"><div class="dialog-heading"><p class="eyebrow">SCORING GUIDE</p><button class="close-dialog" aria-label="Close scoring guide">×</button></div><h2 id="guide-title">Score each decision factor.</h2><p>For each decision factor, consider your assigned U.S. state and choose likelihood and impact from 1 to 5. The risk score, priority ranking, and heat map update automatically.</p><div class="guide-columns"><section><h3>Likelihood</h3><ol><li><strong>Very low</strong> — Rare or unlikely</li><li><strong>Low</strong> — Possible but not expected</li><li><strong>Moderate</strong> — Reasonably possible</li><li><strong>High</strong> — Likely</li><li><strong>Very high</strong> — Very likely</li></ol></section><section><h3>Impact</h3><ol><li><strong>Minimal</strong> — Small effect on success</li><li><strong>Minor</strong> — Manageable effect</li><li><strong>Moderate</strong> — Meaningful effect</li><li><strong>Major</strong> — Serious effect</li><li><strong>Critical</strong> — Could prevent success</li></ol></section></div><div class="formula-note"><strong>Risk score = Likelihood × Impact</strong><span>The heat map counts scored factors. Priority ranks are unique from 1–16 when all factors are scored.</span></div><p class="dialog-footnote">Equal risk scores are ordered by higher impact, then higher likelihood, then listed factor order. Risk scores remain likelihood × impact; each scored factor receives its own priority rank.</p><p class="dialog-footnote">Each visitor works independently. Your entries reset on reload. Use Print / Save PDF to keep all 16 factors for this state assessment, then choose Save as PDF in your browser’s print dialog.</p></dialog>
-  <dialog id="definitions-dialog" aria-labelledby="definitions-title"><div class="dialog-heading"><p class="eyebrow">REFERENCE</p><button class="close-dialog" aria-label="Close factor definitions">×</button></div><h2 id="definitions-title">Decision factors & definitions</h2><p>Four categories. Sixteen factors to consider for your assigned U.S. state.</p><div id="definitions-content"></div></dialog>
-  <dialog id="reset-dialog" class="small-dialog" aria-labelledby="reset-title"><div class="dialog-heading"><p class="eyebrow">START FRESH</p><button class="close-dialog" aria-label="Cancel reset">×</button></div><h2 id="reset-title">Reset the state assessment?</h2><p id="reset-description">This clears the state name and all 16 factors’ scores in this assessment.</p><div class="dialog-actions"><button class="outline-button close-dialog">Keep working</button><button id="confirm-reset" class="primary-button">Reset state assessment</button></div></dialog>
-  <section id="print-report" class="print-report" aria-label="Printable state risk assessment"></section>
+  <dialog id="guide-dialog" aria-labelledby="guide-title">
+    <div class="dialog-heading"><p class="eyebrow">SCORING GUIDE</p><button class="close-dialog" aria-label="Close scoring guide">×</button></div>
+    <h2 id="guide-title">Rate the chance and consequences of a problem.</h2>
+    <p>Use the “Risk to rate” statement for each factor. Think about your country’s AI readiness recommendation, energy mix, and the planning period used in the course. Higher ratings mean a more likely problem or more serious consequences.</p>
+    <div class="guide-columns">
+      <section><h3>Likelihood: how likely is it?</h3><ol>
+        <li><strong>Very low</strong> — Rare or very unlikely under the conditions you are considering.</li>
+        <li><strong>Low</strong> — Possible, but not expected.</li>
+        <li><strong>Moderate</strong> — Reasonably possible; evidence suggests a real chance.</li>
+        <li><strong>High</strong> — Likely unless conditions or safeguards change.</li>
+        <li><strong>Very high</strong> — Very likely, or already happening and expected to continue.</li>
+      </ol></section>
+      <section><h3>Impact: how serious would it be?</h3><ol>
+        <li><strong>Minimal</strong> — Small effects that are easy to manage.</li>
+        <li><strong>Minor</strong> — Limited effects requiring some adjustments or resources.</li>
+        <li><strong>Moderate</strong> — Meaningful effects requiring substantial attention or tradeoffs.</li>
+        <li><strong>Major</strong> — Serious disruption to readiness goals, services, communities, or the environment.</li>
+        <li><strong>Critical</strong> — Could prevent key readiness goals or cause severe, widespread harm.</li>
+      </ol></section>
+    </div>
+    <div class="formula-note"><strong>Risk score = Likelihood × Impact</strong><span>Low 1–4 · Moderate 5–9 · High 10–14 · Critical 15–25</span></div>
+    <p><strong>Example:</strong> A likely problem (4) with major consequences (4) scores 16, Critical. An unlikely problem (2) with the same consequences (4) scores 8, Moderate.</p>
+    <p class="dialog-footnote">Likelihood and impact are separate judgments. Use course evidence rather than copying the example ratings. If evidence is missing, leave the rating blank and return to it; the factor is excluded from the average until both ratings are selected.</p>
+    <p class="dialog-footnote">Priority rank 1 is the highest concern. The current app assigns unique ranks. Equal scores use higher impact first, then higher likelihood, then factor-list order. The heat map counts factors with the same likelihood and impact.</p>
+    <p class="dialog-footnote">Entries reset on reload. Print / Save PDF keeps all 16 factors, definitions, risk prompts, ratings, and results for this assessment.</p>
+  </dialog>
+  <dialog id="definitions-dialog" aria-labelledby="definitions-title"><div class="dialog-heading"><p class="eyebrow">REFERENCE</p><button class="close-dialog" aria-label="Close factor definitions">×</button></div><h2 id="definitions-title">Decision factors & definitions</h2><p>Each term is defined below, followed by the problem to rate and a hypothetical example. Use evidence from your assigned country to choose likelihood and impact.</p><div id="definitions-content"></div></dialog>
+  <dialog id="reset-dialog" class="small-dialog" aria-labelledby="reset-title"><div class="dialog-heading"><p class="eyebrow">START FRESH</p><button class="close-dialog" aria-label="Cancel reset">×</button></div><h2 id="reset-title">Reset the country assessment?</h2><p id="reset-description">This clears the country name and all 16 factors’ scores in this assessment.</p><div class="dialog-actions"><button class="outline-button close-dialog">Keep working</button><button id="confirm-reset" class="primary-button">Reset country assessment</button></div></dialog>
+  <section id="print-report" class="print-report" aria-label="Printable country risk assessment"></section>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Enable JavaScript to use the risk assessment tool.</p></noscript>
 </body>
 </html>
+
