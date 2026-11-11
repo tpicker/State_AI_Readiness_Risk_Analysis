@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Assess sixteen decision factors for your assigned country, explore a live risk heat map, and print or save this assessment as a PDF.">
+  <meta name="description" content="Assess sixteen decision factors for your assigned state, explore a live risk heat map, and print or save this assessment as a PDF.">
   <meta name="theme-color" content="#12385f">
-  <title>Country AI Readiness Risk Analysis</title>
+  <title>State AI Readiness Risk Analysis</title>
   <style>
 
 :root{--navy:#12385f;--ink:#17324d;--text:#263f54;--muted:#526b80;--border:#d6e0e8;--paper:#f3f6f9;--soft:#edf4fa;--teal:#006d8f;--input:#fff;--focus:#1d83cf;color-scheme:light;font-family:Arial,Helvetica,sans-serif}
@@ -279,7 +279,7 @@ const FACTOR_GROUPS = [
     name: 'Environmental',
     factors: [
       { id: 'carbon-emissions', name: 'Carbon emissions', definition: "Climate-warming emissions, especially carbon dioxide, associated with the electricity and other energy used to support AI.", riskPrompt: "Added energy demand increases emissions or makes climate goals harder to meet.", example: "A proposed energy mix relies heavily on fuels that release carbon dioxide. Consider the likely increase in emissions and the consequences for national goals." },
-      { id: 'water-consumption', name: 'Water consumption', definition: "Water used in a way that makes it unavailable for immediate reuse locally, such as water lost through evaporation during cooling.", riskPrompt: "Water needs for AI and its energy supply put pressure on people, farming, ecosystems, or existing services.", example: "During a dry season, extra cooling demand could compete with drinking water or irrigation. Consider the country’s water availability and safeguards." },
+      { id: 'water-consumption', name: 'Water consumption', definition: "Water used in a way that makes it unavailable for immediate reuse locally, such as water lost through evaporation during cooling.", riskPrompt: "Water needs for AI and its energy supply put pressure on people, farming, ecosystems, or existing services.", example: "During a dry season, extra cooling demand could compete with drinking water or irrigation. Consider the state’s water availability and safeguards." },
       { id: 'biodiversity-impacts', name: 'Biodiversity impacts', definition: "Effects on the variety of plants and animals and the habitats that support them.", riskPrompt: "The energy choices supporting AI damage habitats, species, or ecosystem health.", example: "An energy option could affect a sensitive river or habitat. Consider the extent of harm and whether it can be avoided or reduced." },
       { id: 'land-use', name: 'Land use', definition: "How land is shared among uses such as farming, housing, nature, energy supply, and infrastructure.", riskPrompt: "Land needed to support AI readiness conflicts with other uses or creates lasting environmental or community harm.", example: "An energy option could require land also valued for food production or conservation. Consider the scale of the conflict and available alternatives." },
     ],
@@ -291,7 +291,7 @@ const FACTOR_GROUPS = [
       { id: 'public-acceptance', name: 'Public acceptance', definition: "The willingness of people and communities to accept AI expansion and the energy choices needed to support it.", riskPrompt: "Public concerns or opposition make the AI readiness recommendation difficult to support or sustain.", example: "Stakeholders raise unresolved concerns about energy bills, water, or fairness. Consider how widespread those concerns are and their effect on acceptance." },
       { id: 'environmental-justice', name: 'Environmental justice', definition: "How fairly environmental benefits and burdens are shared, especially for communities already facing disadvantage or pollution.", riskPrompt: "Some groups bear a disproportionate share of pollution, water stress, higher costs, or other burdens.", example: "Communities already facing pollution could experience additional burdens while receiving few benefits. Consider who is affected and how seriously." },
       { id: 'regulatory-certainty', name: 'Regulatory certainty', definition: "How clear, predictable, and consistent the rules, policies, and public decisions affecting AI and energy are.", riskPrompt: "Unclear or changing rules create uncertainty that makes AI readiness goals harder to achieve.", example: "Rules for energy connections or environmental protection are unclear or frequently change. Consider the likely consequences for the recommendation." },
-      { id: 'workforce-development', name: 'Workforce development', definition: "The ability to train, recruit, and retain people with the skills needed for AI, electricity systems, and related services.", riskPrompt: "Skills shortages or limited access to training prevent the country from supporting AI readiness and good jobs.", example: "The energy mix requires technical skills that are in short supply. Consider whether education and training can address the gap in time." },
+      { id: 'workforce-development', name: 'Workforce development', definition: "The ability to train, recruit, and retain people with the skills needed for AI, electricity systems, and related services.", riskPrompt: "Skills shortages or limited access to training prevent the state from supporting AI readiness and good jobs.", example: "The energy mix requires technical skills that are in short supply. Consider whether education and training can address the gap in time." },
     ],
   },
   {
@@ -390,7 +390,7 @@ function calculateAssessment(assessment) {
 const $=id=>document.getElementById(id);
 const escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const palettes={environmental:{color:'#44725c',tint:'#e5eee5',description:'Consider the effects on natural systems and resources.'},'social-policy':{color:'#556e99',tint:'#e7edf5',description:'Consider communities, policy, and the people affected by AI readiness decisions.'},economic:{color:'#907344',tint:'#f1ece1',description:'Consider investment, ongoing costs, and financial returns.'},technical:{color:'#78678f',tint:'#eee9f4',description:'Consider resources, infrastructure, and dependable energy.'}};
-const LOCATION_LABEL="Country";
+const LOCATION_LABEL="state";
 let assessment=createAssessment();
 let selectedGroup=FACTOR_GROUPS[0].id;
 let selectedCell=null;
@@ -535,7 +535,7 @@ window.addEventListener('beforeprint',renderPrintReport);
 $('reset-button').addEventListener('click',()=>{
  $('reset-dialog').showModal();
 });
-$('confirm-reset').addEventListener('click',()=>{resetAssessment();$('reset-dialog').close();announce("Country assessment has been reset.");});
+$('confirm-reset').addEventListener('click',()=>{resetAssessment();$('reset-dialog').close();announce("state assessment has been reset.");});
 document.querySelectorAll('.close-dialog').forEach(button=>button.addEventListener('click',()=>button.closest('dialog').close()));
 document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}));
 window.addEventListener('pageshow',event=>{if(event.persisted){document.querySelectorAll('dialog[open]').forEach(dialog=>dialog.close());$('print-report').replaceChildren();resetAssessment();}});
@@ -547,8 +547,8 @@ renderDefinitions();renderCategories();renderCards();
   <a class="skip-link" href="#assessment">Skip to assessment</a>
   <main class="page-shell">
     <header class="intro" aria-labelledby="page-title">
-      <div><p class="eyebrow">AI READINESS · ENERGY &amp; ENVIRONMENTAL DECISIONS</p><h1 id="page-title">Country AI Readiness Risk Analysis</h1>
-      <p class="intro-copy">Assess problems that could affect your assigned country’s AI readiness and energy choices. Rate how likely each problem is and how serious its consequences would be, then use the results to support your recommendation.</p></div>
+      <div><p class="eyebrow">AI READINESS · ENERGY &amp; ENVIRONMENTAL DECISIONS</p><h1 id="page-title">State AI Readiness Risk Analysis</h1>
+      <p class="intro-copy">Assess problems that could affect your assigned state’s AI readiness and energy choices. Rate how likely each problem is and how serious its consequences would be, then use the results to support your recommendation.</p></div>
       <div class="hero-count" aria-label="16 decision factors"><strong>16</strong><span>decision factors</span></div>
     </header>
 
@@ -564,19 +564,19 @@ renderDefinitions();renderCategories();renderCards();
       <p class="eyebrow learning-kicker">START HERE</p>
       <details class="learning-detail overview-detail" id="risk-overview">
       <summary><h2 id="risk-basics-title">What are you assessing?</h2></summary>
-      <p>Consider problems that could affect your assigned country’s AI readiness and its energy choices. Use your course evidence and stakeholder perspectives, and keep the same planning period in mind for all 16 factors.</p>
+      <p>Consider problems that could affect your assigned state’s AI readiness and its energy choices. Use your course evidence and stakeholder perspectives, and keep the same planning period in mind for all 16 factors.</p>
       <p><strong>Score the risk of a problem.</strong> For a factor such as reliability, consider the risk of unreliable supply. For workforce development, consider the risk of missing skills or training. Higher scores always mean greater concern.</p>
       <dl class="learning-terms">
         <div><dt>Likelihood</dt><dd id="likelihood-help">How likely is the problem to happen or continue? Choose 1 for very unlikely through 5 for very likely.</dd></div>
         <div><dt>Impact</dt><dd id="impact-help">If the problem happens, how serious would its consequences be? Choose 1 for minimal effects through 5 for critical effects.</dd></div>
         <div><dt>Risk score</dt><dd>Likelihood × Impact, from 1 to 25. Use it to compare concerns within your assessment.</dd></div>
       </dl>
-      <p class="learning-note">Choose a country, work through the four categories, and rate each factor. Open “What risk am I rating?” on a card for guidance and a hypothetical example. Leave a rating blank while you gather evidence; both ratings are needed for a score.</p>
+      <p class="learning-note">Choose a state, work through the four categories, and rate each factor. Open “What risk am I rating?” on a card for guidance and a hypothetical example. Leave a rating blank while you gather evidence; both ratings are needed for a score.</p>
       </details>
       <details class="learning-detail">
         <summary>See a worked scoring example</summary>
         <p><strong>Hypothetical grid example:</strong> You judge that grid limits are likely to constrain AI readiness (likelihood 4) and would cause major disruption (impact 4). The score is 4 × 4 = <strong>16, Critical</strong>.</p>
-        <p>If the same problem were unlikely (likelihood 2), while its impact remained 4, the score would be 2 × 4 = <strong>8, Moderate</strong>. Choose your ratings using evidence for your assigned country.</p>
+        <p>If the same problem were unlikely (likelihood 2), while its impact remained 4, the score would be 2 × 4 = <strong>8, Moderate</strong>. Choose your ratings using evidence for your assigned state.</p>
       </details>
       <details class="learning-detail">
         <summary>Understand the heat map, priority ranks, and summary numbers</summary>
@@ -606,12 +606,12 @@ renderDefinitions();renderCategories();renderCards();
     </section>
 
     <section class="workspace-bar" aria-label="Assessment location">
-      <div class="assessment-scope" aria-label="Country assessment"><span aria-hidden="true">◎</span><strong>Country assessment</strong><span class="tab-count" id="scope-count">0/16</span></div>
-      <div class="workspace-actions"><span class="print-scope" id="print-scope">Country · all 16 factors</span><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
+      <div class="assessment-scope" aria-label="state assessment"><span aria-hidden="true">◎</span><strong>state assessment</strong><span class="tab-count" id="scope-count">0/16</span></div>
+      <div class="workspace-actions"><span class="print-scope" id="print-scope">state · all 16 factors</span><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
     </section>
 
     <section class="assessment-overview" aria-label="Assessment overview">
-      <div class="location-field"><label id="location-label" for="location-name">Assigned country</label><select id="location-name" autocomplete="off"><option value="">Select a country</option><option value="Algeria">Algeria</option><option value="Brazil">Brazil</option><option value="Costa Rica">Costa Rica</option><option value="France">France</option><option value="Ireland">Ireland</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kenya">Kenya</option><option value="Mexico">Mexico</option><option value="Morocco">Morocco</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="South Korea">South Korea</option><option value="Ukraine">Ukraine</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option></select></div>
+      <div class="location-field"><label id="location-label" for="location-name">Assigned state</label><select id="location-name" autocomplete="off"><option value="">Select a state</option><option value="Algeria">Algeria</option><option value="Brazil">Brazil</option><option value="Costa Rica">Costa Rica</option><option value="France">France</option><option value="Ireland">Ireland</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kenya">Kenya</option><option value="Mexico">Mexico</option><option value="Morocco">Morocco</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="South Korea">South Korea</option><option value="Ukraine">Ukraine</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option></select></div>
       <div class="overview-divider"></div>
       <div class="metric"><span>Factors scored</span><strong><b id="completed-count">0</b><small> / 16</small></strong><div class="progress-track"><div id="progress-fill"></div></div></div>
       <div class="metric"><span>Critical risks</span><strong id="critical-count">0</strong><small>Score of 15–25</small></div>
@@ -642,13 +642,13 @@ renderDefinitions();renderCategories();renderCards();
         <p class="sidebar-note"><span aria-hidden="true">ⓘ</span> Rank 1 is the highest concern. Each scored factor gets a separate rank. Equal scores use higher impact first, then likelihood, then factor-list order.</p>
       </aside>
     </div>
-    <footer class="page-footer"><span>AI Energy Lab <span aria-hidden="true">/</span> Risk Analysis</span><button class="text-button" id="reset-button">↻ Reset country assessment</button></footer>
+    <footer class="page-footer"><span>AI Energy Lab <span aria-hidden="true">/</span> Risk Analysis</span><button class="text-button" id="reset-button">↻ Reset state assessment</button></footer>
   </main>
 
   <dialog id="guide-dialog" aria-labelledby="guide-title">
     <div class="dialog-heading"><p class="eyebrow">SCORING GUIDE</p><button class="close-dialog" aria-label="Close scoring guide">×</button></div>
     <h2 id="guide-title">Rate the chance and consequences of a problem.</h2>
-    <p>Use the “Risk to rate” statement for each factor. Think about your country’s AI readiness recommendation, energy mix, and the planning period used in the course. Higher ratings mean a more likely problem or more serious consequences.</p>
+    <p>Use the “Risk to rate” statement for each factor. Think about your state’s AI readiness recommendation, energy mix, and the planning period used in the course. Higher ratings mean a more likely problem or more serious consequences.</p>
     <div class="guide-columns">
       <section><h3>Likelihood: how likely is it?</h3><ol>
         <li><strong>Very low</strong> — Rare or very unlikely under the conditions you are considering.</li>
@@ -671,9 +671,9 @@ renderDefinitions();renderCategories();renderCards();
     <p class="dialog-footnote">Priority rank 1 is the highest concern. The current app assigns unique ranks. Equal scores use higher impact first, then higher likelihood, then factor-list order. The heat map counts factors with the same likelihood and impact.</p>
     <p class="dialog-footnote">Entries reset on reload. Print / Save PDF keeps all 16 factors, definitions, risk prompts, ratings, and results for this assessment.</p>
   </dialog>
-  <dialog id="definitions-dialog" aria-labelledby="definitions-title"><div class="dialog-heading"><p class="eyebrow">REFERENCE</p><button class="close-dialog" aria-label="Close factor definitions">×</button></div><h2 id="definitions-title">Decision factors & definitions</h2><p>Each term is defined below, followed by the problem to rate and a hypothetical example. Use evidence from your assigned country to choose likelihood and impact.</p><div id="definitions-content"></div></dialog>
-  <dialog id="reset-dialog" class="small-dialog" aria-labelledby="reset-title"><div class="dialog-heading"><p class="eyebrow">START FRESH</p><button class="close-dialog" aria-label="Cancel reset">×</button></div><h2 id="reset-title">Reset the country assessment?</h2><p id="reset-description">This clears the country name and all 16 factors’ scores in this assessment.</p><div class="dialog-actions"><button class="outline-button close-dialog">Keep working</button><button id="confirm-reset" class="primary-button">Reset country assessment</button></div></dialog>
-  <section id="print-report" class="print-report" aria-label="Printable country risk assessment"></section>
+  <dialog id="definitions-dialog" aria-labelledby="definitions-title"><div class="dialog-heading"><p class="eyebrow">REFERENCE</p><button class="close-dialog" aria-label="Close factor definitions">×</button></div><h2 id="definitions-title">Decision factors & definitions</h2><p>Each term is defined below, followed by the problem to rate and a hypothetical example. Use evidence from your assigned state to choose likelihood and impact.</p><div id="definitions-content"></div></dialog>
+  <dialog id="reset-dialog" class="small-dialog" aria-labelledby="reset-title"><div class="dialog-heading"><p class="eyebrow">START FRESH</p><button class="close-dialog" aria-label="Cancel reset">×</button></div><h2 id="reset-title">Reset the state assessment?</h2><p id="reset-description">This clears the state name and all 16 factors’ scores in this assessment.</p><div class="dialog-actions"><button class="outline-button close-dialog">Keep working</button><button id="confirm-reset" class="primary-button">Reset state assessment</button></div></dialog>
+  <section id="print-report" class="print-report" aria-label="Printable state risk assessment"></section>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <noscript><p class="noscript">Enable JavaScript to use the risk assessment tool.</p></noscript>
 </body>
