@@ -271,6 +271,15 @@ dialog>p{font-size:13px;line-height:1.75;color:var(--muted)}
 @media(max-width:620px){.learning-panel{padding:20px 18px;font-size:14px}.learning-terms{grid-template-columns:1fr;gap:14px}.learning-panel h2,.overview-detail>summary{font-size:20px}.factor-help,.factor-help summary{font-size:13px}}
 @media print{.print-risk-prompt{display:block;font-size:9px;line-height:1.35;color:#4e6478;margin-top:3px}}
 </style>
+<style>
+.response-copy-feedback{margin:0 0 20px;color:var(--muted);font-size:12px;line-height:1.6}
+.response-copy-feedback>p{margin:8px 0}
+#copy-status:empty{display:none}
+.response-copy-fallback{margin-top:12px;padding:18px;background:#fff;border:1px solid var(--border);border-radius:12px}
+.response-copy-fallback label{display:block;font-weight:700;color:var(--ink);font-size:13px}
+.response-copy-fallback textarea{width:100%;min-height:180px;margin-top:10px;padding:11px;border:1px solid #aebfce;border-radius:7px;resize:vertical;font:inherit;line-height:1.5;color:var(--ink);background:#fff}
+@media print{.response-copy-feedback{display:none!important}}
+</style>
   <script type="module">
 /** All assessment data is held by the caller in browser memory. */
 const FACTOR_GROUPS = [
@@ -478,6 +487,7 @@ function renderPriorities(summary){
 }
 
 function resetAssessment(){
+ clearRiskResponseCopy();
  assessment=createAssessment();selectedCell=null;
  $('location-name').value='';
  renderCards();
@@ -508,6 +518,72 @@ function printAssessment(){
  renderPrintReport();
  window.print();
 }
+
+function riskResponseSummaryText(){
+  const summary=result();
+  const anyRating=summary.rows.some(row=>row.likelihood!==null||row.impact!==null);
+  const status=summary.count===FACTORS.length?'Complete ratings':anyRating?'Partial responses':'Not started';
+  const lines=[
+    document.querySelector('h1').textContent.trim()+' — Summary of responses',
+    `${LOCATION_LABEL}: ${current().location.trim()||'Not selected'}`,
+    `Status: ${status}`,
+    '', 'ASSESSMENT RESULTS',
+    `Factors fully scored: ${summary.count}/${FACTORS.length}`,
+    `Critical risks: ${summary.criticalCount}`,
+    `Average risk score: ${summary.averageScore===null?'Not available — no fully scored factors':summary.averageScore.toFixed(1)+' / 25 (fully scored factors only)'}`,
+    '', 'ALL FACTOR RESPONSES'
+  ];
+  let number=0;
+  for(const group of FACTOR_GROUPS){
+    lines.push('',group.name.toUpperCase());
+    for(const row of summary.rows.filter(row=>row.groupId===group.id)){
+      lines.push(`${++number}. ${row.name}`);
+      if(row.riskPrompt)lines.push(`   Risk to rate: ${row.riskPrompt}`);
+      lines.push(
+        `   Likelihood: ${row.likelihood===null?'Not rated':row.likelihood+' / 5'}`,
+        `   Impact: ${row.impact===null?'Not rated':row.impact+' / 5'}`,
+        `   Risk score: ${row.score===null?'Not scored — incomplete':row.score+' / 25'}`,
+        `   Risk level: ${row.level??'Not assigned'}`,
+        `   Priority rank: ${row.rank??'Not ranked'}`
+      );
+    }
+  }
+  lines.push('', 'HEAT MAP — COUNTS OF FULLY SCORED FACTORS',
+    'Impact columns: 1, 2, 3, 4, 5');
+  summary.heatmap.forEach((counts,index)=>lines.push(`Likelihood ${5-index}: ${counts.join(', ')}`));
+  lines.push('', 'READING THE RESULTS',
+    'Risk score = Likelihood × Impact. Higher scores mean greater concern.',
+    'Low: 1–4 · Moderate: 5–9 · High: 10–14 · Critical: 15–25.',
+    'Incomplete ratings are excluded from scores, averages, and priority ranks.',
+    "Rank 1 is the highest concern. Each scored factor gets a separate rank. Equal scores use higher impact first, then likelihood, then factor-list order.",
+    'These responses record your judgments for the course simulation; they are not independently verified forecasts.');
+  return lines.join('\n');
+}
+
+function clearRiskResponseCopy(){
+  $('copy-fallback').hidden=true;
+  $('copy-text').value='';
+  $('copy-status').textContent='';
+}
+
+async function copyRiskResponses(){
+  const text=riskResponseSummaryText();
+  clearRiskResponseCopy();
+  try{
+    await navigator.clipboard.writeText(text);
+    $('copy-status').textContent='Summary of responses copied. Paste it into ThingLink or your document.';
+  }catch(error){
+    const field=$('copy-text');field.value=text;
+    $('copy-fallback').hidden=false;
+    field.focus();field.select();
+    $('copy-status').textContent='Automatic copying is unavailable. Your summary is selected below; copy it using your keyboard or device’s Copy command.';
+  }
+}
+
+$('copy-summary').addEventListener('click',copyRiskResponses);
+$('copy-text').addEventListener('click',event=>event.target.select());
+document.addEventListener('input',event=>{if(event.target.id!=='copy-text')clearRiskResponseCopy();});
+document.addEventListener('change',event=>{if(event.target.id!=='copy-text')clearRiskResponseCopy();});
 
 $('location-name').addEventListener('change',event=>{current().location=event.target.value;});
 $('category-tabs').addEventListener('click',event=>{const tab=event.target.closest('[data-category]');if(!tab)return;selectedGroup=tab.dataset.category;renderCategories();renderCards();$('category-tabs').querySelector(`[data-category="${selectedGroup}"]`).focus({preventScroll:true});});
@@ -571,47 +647,25 @@ renderDefinitions();renderCategories();renderCards();
         <div><dt>Impact</dt><dd id="impact-help">If the problem happens, how serious would its consequences be? Choose 1 for minimal effects through 5 for critical effects.</dd></div>
         <div><dt>Risk score</dt><dd>Likelihood × Impact, from 1 to 25. Use it to compare concerns within your assessment.</dd></div>
       </dl>
-      <p class="learning-note">Choose a state, work through the four categories, and rate each factor. Open “What risk am I rating?” on a card for guidance and a hypothetical example. Leave a rating blank while you gather evidence; both ratings are needed for a score.</p>
-      </details>
-      <details class="learning-detail">
-        <summary>See a worked scoring example</summary>
-        <p><strong>Hypothetical grid example:</strong> You judge that grid limits are likely to constrain AI readiness (likelihood 4) and would cause major disruption (impact 4). The score is 4 × 4 = <strong>16, Critical</strong>.</p>
-        <p>If the same problem were unlikely (likelihood 2), while its impact remained 4, the score would be 2 × 4 = <strong>8, Moderate</strong>. Choose your ratings using evidence for your assigned state.</p>
-      </details>
-      <details class="learning-detail">
-        <summary>Understand the heat map, priority ranks, and summary numbers</summary>
-        <dl class="results-terms">
-          <dt>Risk level</dt><dd>The label for a score: Low 1–4, Moderate 5–9, High 10–14, or Critical 15–25. The impact rating describes consequences; the risk level comes from multiplying likelihood and impact.</dd>
-          <dt>Heat map</dt><dd>A grid of likelihood and impact combinations. Color shows the risk level at that combination. The number in a cell counts scored factors there. A 2 means two factors have those same ratings. Select a cell to see their names.</dd>
-          <dt>Priority rank</dt><dd>The order of scored factors from highest concern to lowest. Rank 1 has the highest priority. This app gives each scored factor a separate rank. Equal scores are ordered by higher impact, then higher likelihood, then the order of the factor list.</dd>
-          <dt>Highest priority</dt><dd>The sidebar lists the first five scored factors in that ranking. More factors appear as you complete the assessment.</dd>
-          <dt>Average risk score</dt><dd>The sum of completed risk scores divided by the number of scored factors. Blank or partly rated factors are excluded, so the average can change as you add ratings.</dd>
-          <dt>Critical risks</dt><dd>The number of factors with scores from 15 to 25.</dd>
-          <dt>Factors scored</dt><dd>The number of factors with both a likelihood and an impact rating. A dash means that a result is still incomplete.</dd>
-        </dl>
-      </details>
-      <details class="learning-detail">
-        <summary>Quick glossary: energy and economic terms</summary>
-        <dl class="results-terms">
-          <dt>Energy mix</dt><dd>The combination of energy sources used to support AI and other electricity needs.</dd>
-          <dt>Grid</dt><dd>The connected network of power lines and equipment that moves electricity from supply to users.</dd>
-          <dt>MW and MWh</dt><dd>A megawatt (MW) measures power: the rate of electricity supply or demand. A megawatt-hour (MWh) measures an amount of energy. Supplying 1 MW for one hour provides 1 MWh.</dd>
-          <dt>Capital and operating costs</dt><dd>Capital costs are upfront spending. Operating costs are the recurring expenses needed to keep a service running.</dd>
-          <dt>ROI</dt><dd>Return on investment: financial gain or loss compared with the money invested. It addresses financial return; social and environmental effects are assessed in other factors.</dd>
-          <dt>LCOE and $/MWh</dt><dd>Levelized cost of energy estimates the lifetime cost of generating one unit of electricity. $/MWh means dollars per megawatt-hour. The generation-cost figure should be considered alongside the other factors, including grid needs and reliability.</dd>
-          <dt>Water withdrawal and consumption</dt><dd>Withdrawal is water taken from a source. Consumption is the portion made unavailable for immediate local reuse, such as water lost through evaporation.</dd>
-        </dl>
-        <p class="learning-note">Further explanations: <a href="https://www.eia.gov/energyexplained/electricity/measuring-electricity.php" target="_blank" rel="noopener noreferrer">EIA: electricity units</a>; <a href="https://www.eia.gov/todayinEnergy/detail.php?id=35552" target="_blank" rel="noopener noreferrer">EIA: levelized electricity costs</a>; <a href="https://www.usgs.gov/media/images/consumptive-water-use" target="_blank" rel="noopener noreferrer">USGS: consumptive water use</a>; <a href="https://www.energy.gov/oe/electricity-101" target="_blank" rel="noopener noreferrer">DOE: electricity and the grid</a>. Links open in a new tab.</p>
       </details>
     </section>
 
     <section class="workspace-bar" aria-label="Assessment location">
       <div class="assessment-scope" aria-label="state assessment"><span aria-hidden="true">◎</span><strong>state assessment</strong><span class="tab-count" id="scope-count">0/16</span></div>
-      <div class="workspace-actions"><span class="print-scope" id="print-scope">state · all 16 factors</span><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
+      <div class="workspace-actions"><span class="print-scope" id="print-scope">state · all 16 factors</span><button type="button" class="outline-button" id="copy-summary" aria-describedby="copy-help">Copy summary of responses</button><button class="outline-button" id="print-button" aria-describedby="print-scope"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7V2h10v5M5 14H3V7h14v7h-2M5 11h10v7H5zM14 9h1"/></svg> Print / Save PDF</button></div>
     </section>
+    <div class="response-copy-feedback">
+      <p id="copy-help">Copy all 16 factors, including ratings, results, and priority ranks, to paste into ThingLink.</p>
+      <p id="copy-status" role="status"></p>
+      <div id="copy-fallback" class="response-copy-fallback" hidden>
+        <label for="copy-text">Summary of responses — manual copy</label>
+        <p id="copy-instructions">Press Ctrl+C or Command+C to copy the selected text. On a touch device, use the text selection menu’s Copy command.</p>
+        <textarea id="copy-text" rows="10" readonly aria-describedby="copy-instructions"></textarea>
+      </div>
+    </div>
 
     <section class="assessment-overview" aria-label="Assessment overview">
-      <div class="location-field"><label id="location-label" for="location-name">Assigned state</label><select id="location-name" autocomplete="off"><option value="">Select a state</option><option value="Algeria">Algeria</option><option value="Brazil">Brazil</option><option value="Costa Rica">Costa Rica</option><option value="France">France</option><option value="Ireland">Ireland</option><option value="Japan">Japan</option><option value="Jordan">Jordan</option><option value="Kenya">Kenya</option><option value="Mexico">Mexico</option><option value="Morocco">Morocco</option><option value="Oman">Oman</option><option value="Pakistan">Pakistan</option><option value="South Korea">South Korea</option><option value="Ukraine">Ukraine</option><option value="Venezuela">Venezuela</option><option value="Vietnam">Vietnam</option></select></div>
+      <div class="location-field"><label id="location-label" for="location-name">Assigned state</label><select id="location-name" autocomplete="off"><option value="">Select a state</option><option value="Colorado">Colorado</option><option value="Connecticut">Connecticut</option><option value="Maryland">Maryland</option><option value="New York">New York</option><option value="South Dakota">South Dakota</option><option value="Texas">Texas</option><option value="West Virginia">West Virginia</option></select></div>
       <div class="overview-divider"></div>
       <div class="metric"><span>Factors scored</span><strong><b id="completed-count">0</b><small> / 16</small></strong><div class="progress-track"><div id="progress-fill"></div></div></div>
       <div class="metric"><span>Critical risks</span><strong id="critical-count">0</strong><small>Score of 15–25</small></div>
